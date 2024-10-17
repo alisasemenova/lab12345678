@@ -1,51 +1,57 @@
-#include <stdio.h>
-#include <openssl\sha.h>
-#include <opencv2\core\core.hpp>
-#include <opencv2\highgui\highgui.hpp>
-#include <opencv2\imgproc.hpp>
-#include <fstream>
-#include <string> 
 #include <iostream>
+#include <string>
+#include <fstream>
+#include <cmath>
+#include "function.h"
 
-void Shifter(cv::Mat &img)
+HashTable::HashTable(int size)
 {
-    for (int i =0; i < img.rows; i++)
+    this->capacity = size;
+    elements = new int[size] {};
+}
+
+int HashTable::HashFunction(std::string key)
+{
+    size_t value = 0;
+    for (int i = 0; i < key.length(); i++)
     {
-        for (int j = 0; j < img.cols; j++)
+        value += (key[i] * (int)pow(ALPH_CONST, i)) % capacity;
+    }
+    return value % capacity;
+}
+
+void HashTable::add(std::string key, int value)
+{
+    int index = HashFunction(key);
+    elements[index] = value;
+    count_elem++;
+}
+void HashTable::del(std::string key)
+{
+    int index = HashFunction(key);
+    elements[index] = 0;
+    count_elem--;
+}
+void HashTable::search(std::string key)
+{
+    for (int i = 0; i < capacity; i++)
+    {
+        if (i == HashFunction(key))
         {
-            img.at<cv::Vec3b>(i, j)+=cv::Vec3b(50, 25, 35);
+            std::cout << "The value of " << key << " is: " << elements[i] << std::endl;
+            return;
         }
     }
-} 
-
-std::string SHA256_ImgToFile(const std::string &path)
+    std::cout << "Empty" << std::endl;
+}
+bool HashTable::isEmpty()
 {
-    std::stringstream result;
-
-    unsigned char hash[SHA256_DIGEST_LENGTH];
-
-    std::fstream file(path, std::ios_base::in | std::ios_base::binary); //открывает файл в бинарном виде
-    
-    //считываем в буфер
-    file.seekg(0, std::ios::end);
-    int SizeOfBuffer = file.tellg(); 
-    file.seekg(0, std::ios::beg);
-
-    char *data = new char[SizeOfBuffer];
-    file.read(data, SizeOfBuffer);
-
-    SHA256_CTX img;
-    SHA256_Init(&img);
-    SHA256_Update(&img, data, SizeOfBuffer);
-    SHA256_Final(hash, &img);
-
-    delete [] data;
-   
-    file.close();
-
-    for (int i = 0; i < SHA256_DIGEST_LENGTH; i++) //преобразование хеша в строку для вывода
-    {
-        result << std::hex << (int)hash[i];
-    }
-    return result.str();
+    if (count_elem == 0)
+        return true;
+    else
+        return false;
+}
+int HashTable::HTsize()
+{
+    return capacity;
 }

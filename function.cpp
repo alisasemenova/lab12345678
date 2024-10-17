@@ -1,51 +1,43 @@
-#include <stdio.h>
-#include <openssl\sha.h>
-#include <opencv2\core\core.hpp>
-#include <opencv2\highgui\highgui.hpp>
-#include <opencv2\imgproc.hpp>
-#include <fstream>
-#include <string> 
 #include <iostream>
+#include <string>
+#include <fstream>
+#include <cmath>
+#include "function.h"
 
-void Shifter(cv::Mat &img)
+int HashTable::HashFunction(std::string lastname)
 {
-    for (int i =0; i < img.rows; i++)
+    int value = 0;
+    for (int i = 0; i < lastname.length(); i++)
     {
-        for (int j = 0; j < img.cols; j++)
+        value+=(lastname[i]*(int)pow(ALPH_CONST, i)) % CAPACITY;
+    }
+    return value % CAPACITY;
+}
+
+void HashTable::enrolled(std::string path)
+{    
+    std::string lastname;
+    std::ifstream in(path);
+    if (in.is_open())
+    {
+        while (std::getline(in, lastname))
         {
-            img.at<cv::Vec3b>(i, j)+=cv::Vec3b(50, 25, 35);
+            if (students[HashFunction(lastname)] == 1)
+                duplics++;
+            else
+                unenrolled(lastname);
         }
     }
-} 
-
-std::string SHA256_ImgToFile(const std::string &path)
-{
-    std::stringstream result;
-
-    unsigned char hash[SHA256_DIGEST_LENGTH];
-
-    std::fstream file(path, std::ios_base::in | std::ios_base::binary); //открывает файл в бинарном виде
-    
-    //считываем в буфер
-    file.seekg(0, std::ios::end);
-    int SizeOfBuffer = file.tellg(); 
-    file.seekg(0, std::ios::beg);
-
-    char *data = new char[SizeOfBuffer];
-    file.read(data, SizeOfBuffer);
-
-    SHA256_CTX img;
-    SHA256_Init(&img);
-    SHA256_Update(&img, data, SizeOfBuffer);
-    SHA256_Final(hash, &img);
-
-    delete [] data;
-   
-    file.close();
-
-    for (int i = 0; i < SHA256_DIGEST_LENGTH; i++) //преобразование хеша в строку для вывода
-    {
-        result << std::hex << (int)hash[i];
-    }
-    return result.str();
+    in.close();
 }
+
+void HashTable::unenrolled(std::string lastname)
+{
+    if (students[HashFunction(lastname)] == 0)
+    {
+        students[HashFunction(lastname)] = 1;
+        list += lastname + " ";
+        students_count++;
+    }
+}
+

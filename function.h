@@ -1,11 +1,23 @@
 #pragma once
-#include <stdio.h>
-#include <fstream>
-#include <string>  
 #include <iostream>
-#include <opencv2\core\core.hpp>
-#include <opencv2\highgui\highgui.hpp>
-#include <opencv2\imgproc.hpp>
+#include <string>
+#include <fstream>
+#include <cmath>
+#include <vector>
 
-std::string SHA256_ImgToFile(const std::string &path); //Р¤СѓРЅРєС†РёСЏ РґР»СЏ РІС‹С‡РёСЃР»РµРЅРёСЏ С…РµС€Р°
-void Shifter(cv::Mat &img); //Р¤СѓРЅРєС†РёСЏ, РѕС‚РІРµС‡Р°СЋС‰Р°СЏ Р·Р° РЅР°Р»РѕР¶РµРЅРёРµ С„РёР»СЊС‚СЂР° РЅР° РєР°СЂС‚РёРЅРєСѓ
+class HashTable
+{
+public:
+    static const int ALPH_CONST = 33;
+    int* elements;
+    int capacity;
+    int count_elem = 0;
+    HashTable(int size = 10);
+
+    int HashFunction(std::string key); //Хэш функция
+    void add(std::string key, int value); //Функция добавления товара по ключу и значению
+    void del(std::string key); //Функция удаления товара по ключу
+    void search(std::string key); //Функция поиска товара по ключу
+    bool isEmpty(); //Функция проверки не пуста ли таблица товаров
+    int HTsize(); //Функция получения размера таблицы
+};
